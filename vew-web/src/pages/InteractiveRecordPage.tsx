@@ -7,6 +7,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '../store';
 import { RealtimeAIServiceEnhanced } from '../services/realtime-enhanced';
 import { StreamingMessageHandler } from '../services/streaming-handler';
 import type { StreamingMessage } from '../services/streaming-handler';
@@ -30,6 +31,14 @@ export const InteractiveRecordPage: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [isMicOn, setIsMicOn] = useState(false);
+
+    // Upload State
+    const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+
+    // AI Error State
+    const [wsError, setWsError] = useState<string | null>(null);
 
     // Chat Panel State - positioned from bottom-right
     const [chatPosition, setChatPosition] = useState(() => ({
@@ -217,50 +226,26 @@ export const InteractiveRecordPage: React.FC = () => {
                 videoRef.current.srcObject = null;
             }
 
-            // End WebSocket session and get conversation history
+            // End WebSocket session
             if (wsServiceRef.current) {
-                // Request session end - backend will send session_ended with conversation
                 wsServiceRef.current.endSession();
             }
 
-            // Save conversation history from displayMessages (use ref to get latest state)
-            const conversation = displayMessagesRef.current.map(msg => ({
-                role: msg.role,
-                content: msg.content,
-                timestamp: msg.timestamp
-            }));
-            console.log('[Conversation] Extracted from displayMessagesRef:', conversation);
-            console.log('[Conversation] Total messages:', conversation.length);
+            // Calculate duration
+            const duration = (Date.now() - recordingStartTime.current) / 1000;
+            console.log('[Recording] Duration:', duration, 's');
 
-
-            // Upload video to server with conversation history
+            // Save to store and navigate to CompletePage for upload
             if (blob && blob.size > 0) {
-                console.log('[Upload] Starting upload with conversation history...');
-                const formData = new FormData();
-                formData.append('video', blob, `vew-interactive-${sessionId}.webm`);
-                formData.append('conversation', JSON.stringify(conversation));
-                console.log('[Upload] Conversation JSON:', JSON.stringify(conversation));
-                console.log('[Upload] Conversation messages:', conversation.length);
+                const { setRecordedBlob, setRecordingDuration } = useStore.getState();
+                setRecordedBlob(blob);
+                setRecordingDuration(duration);
 
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('[Upload] Success:', result.videoId);
-
-                    // Navigate to player page
-                    setTimeout(() => navigate(`/player/${result.videoId}`), 500);
-                } else {
-                    throw new Error(`Upload failed: ${response.status}`);
-                }
+                console.log('[Recording] Saved to store, navigating to /complete');
+                navigate('/complete');
             } else {
                 console.warn('[Recording] No video data');
-                const duration = Date.now() - recordingStartTime.current;
-                console.log('[Recording] Duration:', duration, 'ms');
-                if (duration > 2000) {
+                if (duration > 2) {
                     alert('录制时间太短，没有可保存的内容');
                 }
                 navigate('/');

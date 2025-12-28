@@ -551,6 +551,58 @@ app.put('/api/videos/:id/rename', async (req, res) => {
     }
 });
 
+// AI Test Endpoint - runs VLM+AI backend test
+app.get('/api/test-ai', async (req, res) => {
+    try {
+        console.log('🧪 Running VLM+AI test...');
+
+        const { spawn } = await import('child_process');
+        const pythonProcess = spawn('python3', ['test_vlm_ai_backend.py'], {
+            cwd: __dirname,
+            env: process.env
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+
+        pythonProcess.on('close', (code) => {
+            console.log(`Test completed with code ${code}`);
+
+            res.json({
+                success: code === 0,
+                exitCode: code,
+                output: stdout,
+                error: stderr,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Timeout after 60 seconds
+        setTimeout(() => {
+            pythonProcess.kill();
+            res.json({
+                success: false,
+                error: 'Test timeout after 60 seconds'
+            });
+        }, 60000);
+
+    } catch (error) {
+        console.error('Test API error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 
 // TTS Proxy Endpoint
 
