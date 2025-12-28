@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const DEMO_ACCOUNTS = [
-    { email: 'pm@veweb.com', password: 'demo123', name: '产品经理', avatar: '👨‍💼' },
-    { email: 'dev@veweb.com', password: 'demo123', name: '开发工程师', avatar: '👨‍💻' },
-    { email: 'boss@veweb.com', password: 'demo123', name: '老板', avatar: '👔' }
-];
-
 export const DemoLoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -45,10 +39,7 @@ export const DemoLoginPage: React.FC = () => {
         }
     };
 
-    const quickLogin = (account: typeof DEMO_ACCOUNTS[0]) => {
-        setEmail(account.email);
-        setPassword(account.password);
-    };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4">
@@ -62,34 +53,7 @@ export const DemoLoginPage: React.FC = () => {
                     <p className="text-sm text-gray-500 mt-1">演示版本 - 3个测试账号</p>
                 </div>
 
-                {/* Quick Login Buttons */}
-                <div className="mb-6">
-                    <p className="text-sm font-medium text-gray-700 mb-3">快速登录（点击账号自动填充）</p>
-                    <div className="space-y-2">
-                        {DEMO_ACCOUNTS.map((account) => (
-                            <button
-                                key={account.email}
-                                onClick={() => quickLogin(account)}
-                                className="w-full p-3 text-left border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition-all flex items-center gap-3"
-                            >
-                                <span className="text-2xl">{account.avatar}</span>
-                                <div>
-                                    <div className="font-medium text-gray-900">{account.name}</div>
-                                    <div className="text-sm text-gray-500">{account.email}</div>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
 
-                <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-gray-500">或手动输入</span>
-                    </div>
-                </div>
 
                 {/* Error Message */}
                 {error && (
@@ -134,10 +98,10 @@ export const DemoLoginPage: React.FC = () => {
                 {/* Demo Info */}
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-800">
-                        <strong>💡 Demo说明：</strong>所有账号密码都是 <code className="bg-blue-100 px-2 py-1 rounded">demo123</code>
+                        <strong>💡 Demo说明：</strong>使用测试账号登录体验多用户协作功能
                     </p>
                     <p className="text-xs text-blue-600 mt-2">
-                        每个账号的数据相互隔离，演示多用户功能
+                        账号格式: 1-10@veweb.com (数字前缀) | 密码: demo123
                     </p>
                 </div>
             </div>
