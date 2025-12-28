@@ -242,7 +242,7 @@ export const InteractiveRecordPage: React.FC = () => {
                 console.log('[Upload] Conversation JSON:', JSON.stringify(conversation));
                 console.log('[Upload] Conversation messages:', conversation.length);
 
-                const response = await fetch('http://localhost:3001/api/upload', {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
                     method: 'POST',
                     body: formData
                 });
@@ -416,8 +416,8 @@ export const InteractiveRecordPage: React.FC = () => {
                             <button
                                 onClick={toggleMicrophone}
                                 className={`px - 4 py - 2 rounded - lg font - medium transition - all ${isMicOn
-                                        ? 'bg-green-500 hover:bg-green-600 text-white'
-                                        : 'bg-gray-600 hover:bg-gray-700 text-gray-300'
+                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                    : 'bg-gray-600 hover:bg-gray-700 text-gray-300'
                                     } `}
                             >
                                 {isMicOn ? '🎤 麦克风已开启' : '🎙️ 麦克风已关闭'}
@@ -487,10 +487,10 @@ export const InteractiveRecordPage: React.FC = () => {
             <div
                 className="fixed z-50"
                 style={{
-                    left: `${chatPosition.x} px`,
-                    top: `${chatPosition.y} px`,
-                    width: `${chatSize.width} px`,
-                    height: `${chatSize.height} px`,
+                    left: `${chatPosition.x}px`,
+                    top: `${chatPosition.y}px`,
+                    width: `${chatSize.width}px`,
+                    height: `${chatSize.height}px`,
                     cursor: isDragging ? 'grabbing' : 'default'
                 }}
             >
@@ -525,8 +525,8 @@ export const InteractiveRecordPage: React.FC = () => {
                             >
                                 <div
                                     className={`max - w - [80 %] px - 4 py - 2 rounded - lg ${msg.role === 'user'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-700 text-gray-100'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-700 text-gray-100'
                                         } `}
                                 >
                                     <div className="text-xs opacity-70 mb-1">

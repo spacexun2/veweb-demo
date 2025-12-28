@@ -5,72 +5,72 @@
 
 // Demo users (hardcoded for simplicity)
 const DEMO_USERS = {
-    'pm@veweb.com': {
+    '1@veweb.com': {
         id: 1,
-        email: 'pm@veweb.com',
+        email: '1@veweb.com',
         password: 'demo123',
         name: '产品经理',
         avatar: '👨‍💼'
     },
-    'dev@veweb.com': {
+    '2@veweb.com': {
         id: 2,
-        email: 'dev@veweb.com',
+        email: '2@veweb.com',
         password: 'demo123',
         name: '开发工程师',
         avatar: '👨‍💻'
     },
-    'boss@veweb.com': {
+    '3@veweb.com': {
         id: 3,
-        email: 'boss@veweb.com',
+        email: '3@veweb.com',
         password: 'demo123',
         name: '老板',
         avatar: '👔'
     },
-    'designer@veweb.com': {
+    '4@veweb.com': {
         id: 4,
-        email: 'designer@veweb.com',
+        email: '4@veweb.com',
         password: 'demo123',
         name: '设计师',
         avatar: '🎨'
     },
-    'qa@veweb.com': {
+    '5@veweb.com': {
         id: 5,
-        email: 'qa@veweb.com',
+        email: '5@veweb.com',
         password: 'demo123',
         name: '测试工程师',
         avatar: '🔍'
     },
-    'marketing@veweb.com': {
+    '6@veweb.com': {
         id: 6,
-        email: 'marketing@veweb.com',
+        email: '6@veweb.com',
         password: 'demo123',
         name: '市场经理',
         avatar: '📢'
     },
-    'sales@veweb.com': {
+    '7@veweb.com': {
         id: 7,
-        email: 'sales@veweb.com',
+        email: '7@veweb.com',
         password: 'demo123',
         name: '销售经理',
         avatar: '💼'
     },
-    'hr@veweb.com': {
+    '8@veweb.com': {
         id: 8,
-        email: 'hr@veweb.com',
+        email: '8@veweb.com',
         password: 'demo123',
         name: 'HR经理',
         avatar: '👥'
     },
-    'finance@veweb.com': {
+    '9@veweb.com': {
         id: 9,
-        email: 'finance@veweb.com',
+        email: '9@veweb.com',
         password: 'demo123',
         name: '财务经理',
         avatar: '💰'
     },
-    'ceo@veweb.com': {
+    '10@veweb.com': {
         id: 10,
-        email: 'ceo@veweb.com',
+        email: '10@veweb.com',
         password: 'demo123',
         name: 'CEO',
         avatar: '👑'
@@ -197,14 +197,14 @@ export function requireAuth(req, res, next) {
 
 // Export demo users for reference
 export const DEMO_ACCOUNTS = [
-    { email: 'pm@veweb.com', password: 'demo123', name: '产品经理' },
-    { email: 'dev@veweb.com', password: 'demo123', name: '开发工程师' },
-    { email: 'boss@veweb.com', password: 'demo123', name: '老板' },
-    { email: 'designer@veweb.com', password: 'demo123', name: '设计师' },
-    { email: 'qa@veweb.com', password: 'demo123', name: '测试工程师' },
-    { email: 'marketing@veweb.com', password: 'demo123', name: '市场经理' },
-    { email: 'sales@veweb.com', password: 'demo123', name: '销售经理' },
-    { email: 'hr@veweb.com', password: 'demo123', name: 'HR经理' },
-    { email: 'finance@veweb.com', password: 'demo123', name: '财务经理' },
-    { email: 'ceo@veweb.com', password: 'demo123', name: 'CEO' }
+    { email: '1@veweb.com', password: 'demo123', name: '产品经理' },
+    { email: '2@veweb.com', password: 'demo123', name: '开发工程师' },
+    { email: '3@veweb.com', password: 'demo123', name: '老板' },
+    { email: '4@veweb.com', password: 'demo123', name: '设计师' },
+    { email: '5@veweb.com', password: 'demo123', name: '测试工程师' },
+    { email: '6@veweb.com', password: 'demo123', name: '市场经理' },
+    { email: '7@veweb.com', password: 'demo123', name: '销售经理' },
+    { email: '8@veweb.com', password: 'demo123', name: 'HR经理' },
+    { email: '9@veweb.com', password: 'demo123', name: '财务经理' },
+    { email: '10@veweb.com', password: 'demo123', name: 'CEO' }
 ];
