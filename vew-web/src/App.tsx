@@ -7,6 +7,7 @@ import { PlayerPage } from './pages/PlayerPage';
 import { InteractiveRecordPage } from './pages/InteractiveRecordPage';
 import { StreamingDemoPage } from './pages/StreamingDemoPage';
 import { DemoLoginPage } from './pages/DemoLoginPage';
+import { AITestPage } from './pages/AITestPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 export const App = () => {
@@ -15,6 +16,7 @@ export const App = () => {
       <Routes>
         <Route path="/login" element={<DemoLoginPage />} />
         <Route path="/" element={<HomePage />} />
+        <Route path="/test-ai" element={<AITestPage />} />
         <Route path="/record" element={<ProtectedRoute><RecordPage /></ProtectedRoute>} />
         <Route path="/interactive-record" element={<ProtectedRoute><InteractiveRecordPage /></ProtectedRoute>} />
         <Route path="/streaming-demo" element={<ProtectedRoute><StreamingDemoPage /></ProtectedRoute>} />
