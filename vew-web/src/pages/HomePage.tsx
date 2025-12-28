@@ -1,10 +1,49 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export function HomePage() {
     const navigate = useNavigate();
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('demo_token');
+        const userStr = localStorage.getItem('demo_user');
+        if (token && userStr) {
+            setUser(JSON.parse(userStr));
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('demo_token');
+        localStorage.removeItem('demo_user');
+        setUser(null);
+    };
 
     return (
         <div className="min-h-screen relative overflow-hidden flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            {/* Login/Logout Button */}
+            <div className="absolute top-6 right-6 z-20">
+                {user ? (
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm text-slate-700">
+                            {user.avatar} {user.name}
+                        </span>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-white transition-all"
+                        >
+                            退出登录
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:shadow-lg transition-all"
+                    >
+                        🔐 登录
+                    </button>
+                )}
+            </div>
             {/* Dynamic Background Blobs */}
             <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
             <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>

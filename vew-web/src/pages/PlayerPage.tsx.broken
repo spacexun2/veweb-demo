@@ -1,0 +1,333 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getVideo, regenerateTimeline } from '../services/api';
+import type { Video } from '../types';
+import { formatDuration } from '../utils/format';
+import { generateSRT, downloadSRT } from '../utils/srt';
+
+export function PlayerPage() {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+
+    const [video, setVideo] = useState<Video | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'transcript' | 'summary' | 'timeline'>('transcript');
+    const [isRegenerating, setIsRegenerating] = useState(false);
+
+    useEffect(() => {
+        if (!id) {
+            navigate('/history');
+            return;
+        }
+
+        loadVideo();
+
+        // Auto-refresh if video is processing
+        const intervalId = setInterval(() => {
+            if (video?.status === 'processing') {
+                loadVideo();
+            }
+        }, 2000);
+
+        return () => clearInterval(intervalId);
+    }, [id, video?.status]);
+
+    const loadVideo = async () => {
+        if (!id) return;
+
+        setIsLoading(true);
+        try {
+            const data = await getVideo(id);
+            setVideo(data);
+        } catch (error) {
+            console.error('[Player Error] Failed to load video:', error);
+            // User will see empty player - error logged to console
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleExportSRT = () => {
+        if (!video || !video.processing?.transcription) return;
+
+        const srt = generateSRT(video.processing.transcription);
+        downloadSRT(video.filename, srt);
+    };
+    const handleRegenerateTimeline = async () => {
+        if (!video || !id) return;
+
+        setIsRegenerating(true);
+        try {
+            const result = await regenerateTimeline(id);
+            setVideo({
+                ...video,
+                processing: {
+                    ...video.processing!,
+                    timeline: result.timeline
+                }
+            });
+            console.log(`Timeline regenerated: ${result.count} events`);
+        } catch (error) {
+            console.error('Failed to regenerate timeline:', error);
+        } finally {
+            setIsRegenerating(false);
+        }
+    };
+
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                    <div className="mt-2 text-gray-600">加载中...</div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!video) return null;
+
+    const hasTranscript = video.processing?.transcription && video.processing.transcription.length > 0;
+    const hasSummary = video.processing?.summary;
+    const hasTimeline = video.processing?.timeline && video.processing.timeline.length > 0;
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-6xl mx-auto px-6 py-8">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <button
+                        onClick={() => navigate('/history')}
+                        className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
+                    >
+                        ← 返回
+                    </button>
+                    <h1 className="text-2xl font-bold text-gray-900 truncate flex-1 mx-4">
+                        {video.originalName || video.filename}
+                    </h1>
+                    <div className="flex items-center gap-2">
+                        {hasTranscript && (
+                            <button
+                                onClick={handleExportSRT}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                导出SRT
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Video player */}
+                <div className="bg-gray-900 rounded-lg overflow-hidden mb-6">
+                    <video
+                        src={`http://localhost:3001/uploads/${video.filename}`}
+                        controls
+                        className="w-full"
+                    />
+                </div>
+
+                {/* Processing Progress */}
+                {video.status === 'processing' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="animate-spin inline-block w-5 h-5 border-3 border-blue-600 border-t-transparent rounded-full"></div>
+                            <div>
+                                <div className="font-medium text-blue-900">AI Processing in Progress...</div>
+                                <div className="text-sm text-blue-700">
+                                    Transcribing audio... {video.processing?.transcription?.length || 0} segments completed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tabs */}
+                <div className="bg-white rounded-lg shadow-sm">
+                    <div className="border-b border-gray-200">
+                        <div className="flex">
+                            <button
+                                onClick={() => setActiveTab('transcript')}
+                                className={`px-6 py-3 font-medium ${activeTab === 'transcript'
+                                    ? 'text-primary border-b-2 border-primary'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                转录
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('summary')}
+                                className={`px-6 py-3 font-medium ${activeTab === 'summary'
+                                    ? 'text-primary border-b-2 border-primary'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                摘要
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('timeline')}
+                                className={`px-6 py-3 font-medium ${activeTab === 'timeline'
+                                    ? 'text-primary border-b-2 border-primary'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                时间轴
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="p-6">
+                        {activeTab === 'transcript' && (
+                            <div>
+                                {hasTranscript ? (
+                                    <div className="space-y-2">
+                                        {video.processing!.transcription!.map((segment, index) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => {
+                                                    const videoElement = document.querySelector('video');
+                                                    if (videoElement) {
+                                                        videoElement.currentTime = segment.start;
+                                                        videoElement.play();
+                                                    }
+                                                }}
+                                                className="flex gap-4 p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group"
+                                            >
+                                                <div className="text-sm font-medium text-blue-600 w-24 flex-shrink-0 group-hover:text-blue-700">
+                                                    {formatDuration(segment.start)}
+                                                </div>
+                                                <div className="flex-1 text-gray-900 leading-relaxed">
+                                                    {segment.text}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        暂无转录数据
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'summary' && (
+                            <div>
+                                {hasSummary ? (
+                                    <div className="space-y-6">
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-2">概要</h3>
+                                            <p className="text-gray-700 whitespace-pre-wrap">
+                                                {typeof video.processing!.summary === 'string'
+                                                    ? video.processing!.summary
+                                                    : video.processing!.summary!.tldr}
+                                            </p>
+                                        </div>
+
+                                        {typeof video.processing!.summary === 'object' && video.processing!.summary!.keyPoints?.length > 0 && (
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900 mb-2">关键点</h3>
+                                                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                                    {video.processing!.summary!.keyPoints.map((point, index) => (
+                                                        <li key={index}>{point}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {typeof video.processing!.summary === 'object' && video.processing!.summary!.actionItems?.length > 0 && (
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900 mb-2">待办事项</h3>
+                                                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                                    {video.processing!.summary!.actionItems.map((item, index) => (
+                                                        <li key={index}>{item}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        暂无摘要数据
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'timeline' && (
+                            <div>
+                                {/* Always show regenerate button if transcription exists */}
+                                {video.processing?.transcription && (
+                                    <div className="mb-4 flex justify-end">
+                                        <button
+                                            onClick={handleRegenerateTimeline}
+                                            disabled={isRegenerating}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                                        >
+                                            {isRegenerating ? (
+                                                <>
+                                                    <span className="animate-spin">🔄</span>
+                                                    重新生成中...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>🔄</span>
+                                                    重新生成时间轴
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                {hasTimeline ? (
+                                    <div className="space-y-2">
+                                        {/* Timeline Events */}
+                                        <div className="space-y-2">
+                                        {video.processing!.timeline!.map((event, index) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => {
+                                                    const videoElement = document.querySelector('video');
+                                                    if (videoElement) {
+                                                        videoElement.currentTime = event.timestamp;
+                                                        videoElement.play();
+                                                    }
+                                                }}
+                                                className="flex gap-4 p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors group"
+                                            >
+                                                <div className="text-sm font-medium text-blue-600 w-24 flex-shrink-0 group-hover:text-blue-700">
+                                                    {formatDuration(event.timestamp)}
+                                                </div>
+                                                <div className="flex-1">
+                                                    {event.type && (
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                                                                {event.type}
+                                                            </span>
+                                                            {event.importance && (
+                                                                <span className={`px-2 py-0.5 text-xs font-medium rounded ${event.importance === 'high' ? 'bg-red-100 text-red-600' :
+                                                                    event.importance === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                                                                        'bg-gray-100 text-gray-600'
+                                                                    }`}>
+                                                                    {event.importance}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-gray-900 leading-relaxed">{event.event || event.content || '事件'}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        暂无时间轴数据
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
