@@ -6,8 +6,17 @@ import type {
 } from '../types';
 
 const api = axios.create({
-    baseURL: '',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
     timeout: 30000,
+});
+
+// Add token to all requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('demo_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
 });
 
 // Get all videos
@@ -72,5 +81,11 @@ export async function renameVideo(videoId: string, newName: string) {
 
 export async function regenerateTimeline(videoId: string): Promise<{ success: boolean; timeline: any[]; count: number }> {
     const response = await api.post(`/api/videos/${videoId}/regenerate-timeline`);
+    return response.data;
+}
+
+// Demo Login
+export async function demoLogin(email: string, password: string): Promise<{ token: string; user: any }> {
+    const response = await api.post('/api/demo-login', { email, password });
     return response.data;
 }

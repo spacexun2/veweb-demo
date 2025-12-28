@@ -8,7 +8,7 @@ const DEMO_USERS = {
     'pm@veweb.com': {
         id: 1,
         email: 'pm@veweb.com',
-        password: 'demo123', // In production, this would be hashed
+        password: 'demo123',
         name: '产品经理',
         avatar: '👨‍💼'
     },
@@ -25,6 +25,55 @@ const DEMO_USERS = {
         password: 'demo123',
         name: '老板',
         avatar: '👔'
+    },
+    'designer@veweb.com': {
+        id: 4,
+        email: 'designer@veweb.com',
+        password: 'demo123',
+        name: '设计师',
+        avatar: '🎨'
+    },
+    'qa@veweb.com': {
+        id: 5,
+        email: 'qa@veweb.com',
+        password: 'demo123',
+        name: '测试工程师',
+        avatar: '🔍'
+    },
+    'marketing@veweb.com': {
+        id: 6,
+        email: 'marketing@veweb.com',
+        password: 'demo123',
+        name: '市场经理',
+        avatar: '📢'
+    },
+    'sales@veweb.com': {
+        id: 7,
+        email: 'sales@veweb.com',
+        password: 'demo123',
+        name: '销售经理',
+        avatar: '💼'
+    },
+    'hr@veweb.com': {
+        id: 8,
+        email: 'hr@veweb.com',
+        password: 'demo123',
+        name: 'HR经理',
+        avatar: '👥'
+    },
+    'finance@veweb.com': {
+        id: 9,
+        email: 'finance@veweb.com',
+        password: 'demo123',
+        name: '财务经理',
+        avatar: '💰'
+    },
+    'ceo@veweb.com': {
+        id: 10,
+        email: 'ceo@veweb.com',
+        password: 'demo123',
+        name: 'CEO',
+        avatar: '👑'
     }
 };
 
@@ -150,5 +199,12 @@ export function requireAuth(req, res, next) {
 export const DEMO_ACCOUNTS = [
     { email: 'pm@veweb.com', password: 'demo123', name: '产品经理' },
     { email: 'dev@veweb.com', password: 'demo123', name: '开发工程师' },
-    { email: 'boss@veweb.com', password: 'demo123', name: '老板' }
+    { email: 'boss@veweb.com', password: 'demo123', name: '老板' },
+    { email: 'designer@veweb.com', password: 'demo123', name: '设计师' },
+    { email: 'qa@veweb.com', password: 'demo123', name: '测试工程师' },
+    { email: 'marketing@veweb.com', password: 'demo123', name: '市场经理' },
+    { email: 'sales@veweb.com', password: 'demo123', name: '销售经理' },
+    { email: 'hr@veweb.com', password: 'demo123', name: 'HR经理' },
+    { email: 'finance@veweb.com', password: 'demo123', name: '财务经理' },
+    { email: 'ceo@veweb.com', password: 'demo123', name: 'CEO' }
 ];
