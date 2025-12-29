@@ -422,7 +422,10 @@ except Exception as e:
     }
 });
 
-// 404 handler
+
+
+
+// 404 handler - MUST be after all route definitions
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
 });
@@ -605,5 +608,4 @@ app.get('/api/test-ai', async (req, res) => {
 
 
 // TTS Proxy Endpoint
-
 
