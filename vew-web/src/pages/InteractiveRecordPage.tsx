@@ -416,8 +416,8 @@ export const InteractiveRecordPage: React.FC = () => {
                             <button
                                 onClick={toggleMicrophone}
                                 className={`px - 4 py - 2 rounded - lg font - medium transition - all ${isMicOn
-                                        ? 'bg-green-500 hover:bg-green-600 text-white'
-                                        : 'bg-gray-600 hover:bg-gray-700 text-gray-300'
+                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                    : 'bg-gray-600 hover:bg-gray-700 text-gray-300'
                                     } `}
                             >
                                 {isMicOn ? '🎤 麦克风已开启' : '🎙️ 麦克风已关闭'}
@@ -457,7 +457,6 @@ export const InteractiveRecordPage: React.FC = () => {
                     {!isRecording ? (
                         <button
                             onClick={startRecording}
-                            disabled={!isConnected}
                             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center gap-3"
                         >
                             <span className="text-2xl">⏺</span>
@@ -525,8 +524,8 @@ export const InteractiveRecordPage: React.FC = () => {
                             >
                                 <div
                                     className={`max - w - [80 %] px - 4 py - 2 rounded - lg ${msg.role === 'user'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-700 text-gray-100'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-700 text-gray-100'
                                         } `}
                                 >
                                     <div className="text-xs opacity-70 mb-1">
