@@ -1,2 +1,10 @@
-# Nixpacks configuration - simple approach
 providers = ["node", "python"]
+
+[phases.install]
+cmds = [
+  "npm install",
+  "pip install -r requirements.txt"
+]
+
+[start]
+cmd = "node server.js"
