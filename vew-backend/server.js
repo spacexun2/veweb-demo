@@ -676,3 +676,8 @@ app.put('/api/videos/:id/rename', async (req, res) => {
 
 // TTS Proxy Endpoint
 
+
+// Test endpoint to verify Railway deployment
+app.get('/api/test-new', (req, res) => {
+    res.json({ status: 'NEW CODE DEPLOYED', timestamp: new Date().toISOString() });
+});
