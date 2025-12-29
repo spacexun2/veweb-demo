@@ -9,8 +9,9 @@ import os
 import tempfile
 import urllib.request
 
-# Add backend to path
-sys.path.insert(0, '/Users/bytedance/Desktop/Veweb/vew-backend')
+# Add backend to path (use script's directory instead of hardcoded path)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, script_dir)
 
 print("=" * 70)
 print("完整后端测试: VLM图片理解 → AI智能回复")
