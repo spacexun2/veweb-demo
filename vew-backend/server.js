@@ -561,28 +561,6 @@ app.post("/api/chat", async (req, res) => {
 });
 
 
-app.listen(PORT, () => {
-    console.log('');
-    console.log('╔════════════════════════════════════════╗');
-    console.log('║   🚀 Vew Backend Server Started       ║');
-    console.log('╚════════════════════════════════════════╝');
-    console.log('');
-    console.log(`   📍 Server:    http://localhost:${PORT}`);
-    console.log(`   📂 Uploads:   ${path.join(__dirname, 'uploads')}`);
-    console.log(`   💾 Database:  ${path.join(__dirname, 'db/videos.json')}`);
-    console.log('');
-    console.log('📋 Available Endpoints:');
-    console.log('   GET    /health');
-    console.log('   GET    /api/videos');
-    console.log('   GET    /api/video/:id');
-    console.log('   POST   /api/upload');
-    console.log('   POST   /api/videos/batch-process');
-    console.log('   POST   /api/videos/batch-delete');
-    console.log('   POST   /api/videos/batch-export-srt');
-    console.log('');
-    console.log('💡 Ready to accept requests!');
-    console.log('');
-});
 
 // API Cost Stats Endpoint
 app.get('/api/cost-stats', async (req, res) => {
