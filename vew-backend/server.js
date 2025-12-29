@@ -490,6 +490,69 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
+// AI Chat endpoint (HTTP alternative to WebSocket)
+app.post("/api/chat", async (req, res) => {
+    const { message, history = [] } = req.body;
+    
+    console.log("[API Chat] User message:", message);
+    
+    if (!message || !message.trim()) {
+        return res.status(400).json({ error: "Message is required" });
+    }
+    
+    try {
+        const messages = [
+            ...history.map(h => ({ role: h.role, content: h.content })),
+            { role: "user", content: message }
+        ];
+        
+        const dashscopeKey = process.env.DASHSCOPE_CHAT_API_KEY;
+        if (!dashscopeKey) {
+            throw new Error("DASHSCOPE_CHAT_API_KEY not configured");
+        }
+        
+        const response = await fetch(
+            "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${dashscopeKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "qwen-plus",
+                    input: { messages },
+                    parameters: {
+                        result_format: "message"
+                    }
+                })
+            }
+        );
+        
+        if (!response.ok) {
+            throw new Error(`Dashscope API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const aiReply = data.output.choices[0].message.content;
+        
+        console.log("[API Chat] AI reply:", aiReply.substring(0, 100) + "...");
+        
+        res.json({ 
+            reply: aiReply,
+            success: true
+        });
+        
+    } catch (error) {
+        console.error("[API Chat] Error:", error.message);
+        res.status(500).json({ 
+            error: error.message,
+            success: false
+        });
+    }
+});
+
+
 app.listen(PORT, () => {
     console.log('');
     console.log('╔════════════════════════════════════════╗');
