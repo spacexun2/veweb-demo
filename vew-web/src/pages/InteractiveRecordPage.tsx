@@ -3,6 +3,8 @@
  * 
  * 实时AI语音对话 + 屏幕录制功能
  * 基于StreamingDemoPage，添加屏幕录制和Frame分析
+ * 
+ * VERSION: 2025-12-30-FINAL-FIX
  */
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -13,6 +15,8 @@ import type { StreamingMessage } from '../services/streaming-handler';
 import { TTSService } from '../services/tts';
 import { ScreenRecorder } from '../services/recorder';
 import { VoiceRecognitionService } from '../services/voice';
+
+const PAGE_VERSION = '2025-12-30-FINAL-FIX';
 
 export const InteractiveRecordPage: React.FC = () => {
     const navigate = useNavigate();
@@ -135,31 +139,49 @@ export const InteractiveRecordPage: React.FC = () => {
 
     // Start recording
     const startRecording = async () => {
-        try {
-            console.log('[Recording] Starting...');
+        console.log('[Recording] ========================================');
+        console.log('[Recording] Button clicked! Starting recording...');
+        console.log('[Recording] Current state:', { isRecording, isConnected });
 
+        try {
             // 1. Start screen recorder
+            console.log('[Recording] Step 1: Creating ScreenRecorder...');
             recorderRef.current = new ScreenRecorder();
+
+            console.log('[Recording] Step 2: Requesting screen permission...');
             await recorderRef.current.startRecording();
+            console.log('[Recording] ✓ Screen recording started');
 
             // 2. Get stream for preview
+            console.log('[Recording] Step 3: Setting up preview...');
             const stream = recorderRef.current.getStream();
             if (videoRef.current && stream) {
                 videoRef.current.srcObject = stream;
                 videoRef.current.play();
+                console.log('[Recording] ✓ Preview active');
             }
 
-            // 2. Start frame capture for VLM analysis
+            // 3. Start frame capture for VLM analysis
+            console.log('[Recording] Step 4: Starting frame capture...');
             startFrameCapture();
+            console.log('[Recording] ✓ Frame capture started');
 
-            // 3. Update state
+            // 4. Update state
             setIsRecording(true);
             recordingStartTime.current = Date.now();
+            console.log('[Recording] ✓ State updated, isRecording=true');
 
-            console.log('[Recording] Started successfully');
+            console.log('[Recording] ✅ ALL STEPS COMPLETED SUCCESSFULLY!');
+            console.log('[Recording] ========================================');
         } catch (err) {
-            console.error('[Recording] Failed to start:', err);
-            alert(`录制失败: ${err}`);
+            const error = err as Error;
+            console.error('[Recording] ❌ FAILED:', error);
+            console.error('[Recording] Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
+            alert(`录制失败: ${error.message || error}`);
         }
     };
 
@@ -456,11 +478,17 @@ export const InteractiveRecordPage: React.FC = () => {
                 <div className="flex items-center justify-center gap-4">
                     {!isRecording ? (
                         <button
-                            onClick={startRecording}
-                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center gap-3"
+                            onClick={() => {
+                                console.log('[Button] CLICK EVENT FIRED!');
+                                console.log('[Button] Calling startRecording()...');
+                                startRecording();
+                            }}
+                            data-version={PAGE_VERSION}
+                            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center gap-3 cursor-pointer"
+                            style={{ opacity: 1, pointerEvents: 'auto' }}
                         >
                             <span className="text-2xl">⏺</span>
-                            开始AI互动录制
+                            开始AI互动录制 [v{PAGE_VERSION.split('-').pop()}]
                         </button>
                     ) : (
                         <button
