@@ -1,6 +1,6 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd vew-backend && npm install"
+buildCommand = "cd vew-backend && rm -rf node_modules .next && npm install"
 
 [deploy]
 startCommand = "cd vew-backend && npm start"
