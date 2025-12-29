@@ -14,8 +14,8 @@ RUN npm ci
 # Copy Python requirements
 COPY requirements.txt ./
 
-# Install Python dependencies
-RUN pip3 install -r requirements.txt
+# Install Python dependencies (bypass externally-managed-environment)
+RUN pip3 install --break-system-packages -r requirements.txt
 
 # Copy application code
 COPY . .
