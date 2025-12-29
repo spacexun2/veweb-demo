@@ -495,6 +495,7 @@ export const InteractiveRecordPage: React.FC = () => {
                     {!isRecording ? (
                         <button
                             onClick={startRecording}
+                            disabled={false}
                             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center gap-3"
                         >
                             <span className="text-2xl">⏺</span>
