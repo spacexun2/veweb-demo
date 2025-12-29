@@ -1,1 +1,1 @@
-web: node vew-backend/server.js
+web: cd vew-backend && node server.js
