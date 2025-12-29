@@ -75,6 +75,12 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Simple ping endpoint for debugging
+app.get('/api/ping', (req, res) => {
+    res.json({ message: 'pong', timestamp: new Date().toISOString() });
+});
+
+
 // ==================== DEMO AUTH ROUTES ====================
 
 // Demo login
