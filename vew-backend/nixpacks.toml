@@ -1,0 +1,2 @@
+# Nixpacks configuration - tell Railway to use both Node.js and Python
+providers = ["node", "python"]
