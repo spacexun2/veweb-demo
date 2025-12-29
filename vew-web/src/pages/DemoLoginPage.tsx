@@ -95,15 +95,7 @@ export const DemoLoginPage: React.FC = () => {
                     </button>
                 </form>
 
-                {/* Demo Info */}
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                        <strong>💡 Demo说明：</strong>使用测试账号登录体验多用户协作功能
-                    </p>
-                    <p className="text-xs text-blue-600 mt-2">
-                        账号格式: 1-10@veweb.com (数字前缀) | 密码: demo123
-                    </p>
-                </div>
+
             </div>
 
             {/* Footer */}

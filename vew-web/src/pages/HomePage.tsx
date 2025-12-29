@@ -104,6 +104,14 @@ export function HomePage() {
                         <span className="text-2xl">📂</span>
                         历史记录
                     </button>
+
+                    <button
+                        onClick={() => navigate('/test-ai')}
+                        className="bg-gradient-to-r from-green-600 to-teal-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+                    >
+                        <span className="text-2xl">🧪</span>
+                        AI测试
+                    </button>
                 </div>
 
                 {/* Colorful Cards */}
