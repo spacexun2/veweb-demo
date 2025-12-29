@@ -490,6 +490,14 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
+// Handle OPTIONS preflight for CORS
+app.options("/api/chat", (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.sendStatus(204);
+});
+
 // AI Chat endpoint (HTTP alternative to WebSocket)
 app.post("/api/chat", async (req, res) => {
     // Add CORS headers
