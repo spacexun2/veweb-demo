@@ -1,14 +1,2 @@
-# Nixpacks configuration
+# Nixpacks configuration - simple approach
 providers = ["node", "python"]
-
-# Override node install to use npm install instead of npm ci
-[phases.setup]
-nixPkgs = ["nodejs", "python311"]
-
-[phases.install]
-dependsOn = ["setup"]
-cmds = ["npm install"]
-
-[phases.build]
-dependsOn = ["install"]  
-cmds = ["pip install -r requirements.txt"]
