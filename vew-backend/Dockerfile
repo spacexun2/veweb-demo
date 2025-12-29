@@ -20,8 +20,9 @@ RUN pip3 install --break-system-packages -r requirements.txt
 # Copy application code
 COPY . .
 
-# Expose port
-EXPOSE 8080
+# Expose ports
+EXPOSE 8080 8000
 
-# Start command
-CMD ["node", "server.js"]
+# Start both services
+# Python WebSocket service on 8000, Node.js Express on 8080
+CMD uvicorn realtime_ai_service:app --host 0.0.0.0 --port 8000 & node server.js
