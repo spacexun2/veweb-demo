@@ -484,17 +484,6 @@ app.get('/api/test-ai', async (req, res) => {
     }
 });
 
-// 404 handler - MUST be after all route definitions
-app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-    console.error('Server error:', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
-});
-
 // Start server
 // Handle OPTIONS preflight for CORS
 app.options("/api/chat", (req, res) => {
@@ -699,4 +688,25 @@ app.put('/api/videos/:id/rename', async (req, res) => {
 // Test endpoint to verify Railway deployment
 app.get('/api/test-new', (req, res) => {
     res.json({ status: 'NEW CODE DEPLOYED', timestamp: new Date().toISOString() });
+});
+
+// ==================== ERROR HANDLERS (MUST BE LAST) ====================
+
+// 404 handler - catches all undefined routes
+app.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint not found' });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+});
+
+// ==================== START SERVER ====================
+
+app.listen(PORT, () => {
+    console.log(`🚀 Vew Backend Server running on port ${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌐 CORS enabled for all origins`);
 });
