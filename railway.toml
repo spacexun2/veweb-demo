@@ -3,6 +3,6 @@ builder = "NIXPACKS"
 buildCommand = "cd vew-backend && npm install"
 
 [deploy]
-startCommand = "cd vew-backend && node server.js"
+startCommand = "cd vew-backend && npm start"
 restartPolicyType = "ON_FAILURE" 
 restartPolicyMaxRetries = 10
