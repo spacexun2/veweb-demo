@@ -1,5 +1,8 @@
-# Nixpacks configuration - tell Railway to use both Node.js and Python
+# Nixpacks configuration - Node.js + Python
 providers = ["node", "python"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = [
+  "npm install",
+  "pip install -r requirements.txt"
+]
