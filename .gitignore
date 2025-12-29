@@ -28,7 +28,6 @@ error_details.json
 timeline_code.txt
 
 # Test files
-test_*.py
 test_*.sh
 test_*.wav
 test_*.mp3
