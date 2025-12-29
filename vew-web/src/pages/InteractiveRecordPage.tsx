@@ -40,6 +40,11 @@ export const InteractiveRecordPage: React.FC = () => {
     // AI Error State
     const [wsError, setWsError] = useState<string | null>(null);
 
+    // Pending transcript state (for ASR accumulation)
+    const [pendingTranscript, setPendingTranscript] = useState('');
+    const [showPendingUI, setShowPendingUI] = useState(false);
+    const transcriptTimerRef = useRef<number | null>(null);
+
     // Chat Panel State - positioned from bottom-right
     const [chatPosition, setChatPosition] = useState(() => ({
         x: typeof window !== 'undefined' ? window.innerWidth - 384 - 16 : 800, // right: 16px
@@ -84,14 +89,14 @@ export const InteractiveRecordPage: React.FC = () => {
             (speaking) => setIsAISpeaking(speaking)
         );
 
-        // Initialize WebSocket
-        wsServiceRef.current = new RealtimeAIServiceEnhanced(sessionId);
-        wsServiceRef.current.connect((message) => {
-            console.log('[InteractiveRecord] Received message:', message);
-            streamingHandlerRef.current?.handleMessage(message);
-        });
-
-        setIsConnected(true);
+        // DISABLED for HTTP chat:         // Initialize WebSocket
+        // DISABLED for HTTP chat:         wsServiceRef.current = new RealtimeAIServiceEnhanced(sessionId);
+        // DISABLED for HTTP chat:         wsServiceRef.current.connect((message) => {
+        // DISABLED for HTTP chat:             console.log('[InteractiveRecord] Received message:', message);
+        // DISABLED for HTTP chat:             streamingHandlerRef.current?.handleMessage(message);
+        // DISABLED for HTTP chat:         });
+        // DISABLED for HTTP chat: 
+        // DISABLED for HTTP chat:         setIsConnected(true);
 
         // Initialize voice service
         voiceServiceRef.current = new VoiceRecognitionService();
@@ -134,11 +139,86 @@ export const InteractiveRecordPage: React.FC = () => {
         }
     }, [isRecording, isMicOn, isAISpeaking]);
 
-    // Voice transcript handler
+    // Voice transcript handler - with accumulation to fix truncation
     const handleVoiceTranscript = (transcript: string, isFinal: boolean) => {
         if (isFinal && transcript.trim()) {
             console.log('[Voice] Final transcript:', transcript);
-            handleSendMessage(transcript);
+
+            // Accumulate transcript
+            setPendingTranscript(prev => prev + transcript);
+            setShowPendingUI(true);
+
+            // Clear existing timer
+            if (transcriptTimerRef.current) {
+                clearTimeout(transcriptTimerRef.current);
+            }
+
+            // Auto-send after 2 seconds of silence
+            transcriptTimerRef.current = window.setTimeout(() => {
+                setPendingTranscript(current => {
+                    if (current.trim()) {
+                        console.log('[Voice] Sending accumulated:', current);
+                        handleSendMessageHTTP(current);
+                    }
+                    return '';
+                });
+                setShowPendingUI(false);
+            }, 5000); // Extended from 2s to 5s
+        }
+    };
+
+    // Send pending transcript immediately
+    const sendPendingNow = () => {
+        if (transcriptTimerRef.current) {
+            clearTimeout(transcriptTimerRef.current);
+        }
+        if (pendingTranscript.trim()) {
+            handleSendMessageHTTP(pendingTranscript);
+            setPendingTranscript('');
+            setShowPendingUI(false);
+        }
+    };
+
+    // HTTP-based AI chat (alternative to WebSocket)
+    const handleSendMessageHTTP = async (text?: string) => {
+        const messageText = text || inputText;
+        if (!messageText.trim()) return;
+
+        console.log('[Chat HTTP] Sending:', messageText);
+
+        const userMsg = {
+            id: `msg-${Date.now()}`,
+            role: 'user' as const,
+            content: messageText,
+            timestamp: Date.now() / 1000
+        };
+
+        displayMessagesRef.current.push(userMsg);
+        setMessages(prev => [...prev, { role: 'user', content: messageText, id: userMsg.id, timestamp: userMsg.timestamp }]);
+        setInputText('');
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: messageText, history: displayMessagesRef.current })
+            });
+
+            const data = await res.json();
+
+            if (data.success && data.reply) {
+                const aiMsg = {
+                    id: `msg-${Date.now()}`,
+                    role: 'assistant' as const,
+                    content: data.reply,
+                    timestamp: Date.now() / 1000
+                };
+
+                displayMessagesRef.current.push(aiMsg);
+                setMessages(prev => [...prev, { role: 'assistant', content: data.reply, id: aiMsg.id, timestamp: aiMsg.timestamp }]);
+            }
+        } catch (error) {
+            console.error('[Chat HTTP] Error:', error);
         }
     };
 
@@ -264,38 +344,11 @@ export const InteractiveRecordPage: React.FC = () => {
     };
 
     // Send message
-    const handleSendMessage = (text?: string) => {
-        const messageText = text || inputText;
-
-        if (!messageText.trim() || !wsServiceRef.current) {
-            return;
-        }
-
-        const timestamp = Date.now() / 1000;
-        console.log('[Message] Sending:', messageText, 'at', timestamp);
-
-        // 用户发送新消息时，停止当前AI的TTS播放
-        if (ttsServiceRef.current) {
-            console.log('[TTS] User interrupted - stopping playback');
-            ttsServiceRef.current.stop();
-        }
-
-        // Add user message
-        streamingHandlerRef.current?.addUserMessage(messageText);
-
-        // Send to backend
-        wsServiceRef.current?.sendMessage(messageText, timestamp);
-
-        // Clear input
-        if (!text) {
-            setInputText('');
-        }
-    };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            handleSendMessage();
+            handleSendMessageHTTP();
         }
     };
 
@@ -442,7 +495,6 @@ export const InteractiveRecordPage: React.FC = () => {
                     {!isRecording ? (
                         <button
                             onClick={startRecording}
-                            disabled={!isConnected}
                             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center gap-3"
                         >
                             <span className="text-2xl">⏺</span>
@@ -539,7 +591,7 @@ export const InteractiveRecordPage: React.FC = () => {
                                 className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                             />
                             <button
-                                onClick={() => handleSendMessage()}
+                                onClick={() => handleSendMessageHTTP()}
                                 disabled={!inputText.trim()}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                             >
@@ -559,6 +611,28 @@ export const InteractiveRecordPage: React.FC = () => {
                         }}
                     />
                 </div>
+
+                {/* Pending Transcript UI - Fixed position */}
+                {showPendingUI && pendingTranscript && (
+                    <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-white border-2 border-blue-500 px-4 py-3 rounded-lg shadow-lg z-50 max-w-md">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500 font-semibold mb-1">🎤 语音识别中:</p>
+                                <p className="text-sm font-medium text-gray-900">{pendingTranscript}</p>
+                                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                    <span className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                    5秒后自动发送...
+                                </p>
+                            </div>
+                            <button
+                                onClick={sendPendingNow}
+                                className="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-sm font-medium transition-colors flex-shrink-0"
+                            >
+                                立即发送
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
